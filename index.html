@@ -4,22 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gürai - Yapay Zeka Asistanı</title>
-    <!-- Google Identity Services (Google Giriş Kütüphanesi) -->
+    <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
+        * { box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121212;
             color: #ffffff;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        /* Giriş Ekranı Stilleri */
+        #login-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            margin: 0;
-        }
-        .container {
             text-align: center;
+        }
+        .card {
             background: #1e1e1e;
             padding: 40px;
             border-radius: 12px;
@@ -38,41 +45,125 @@
             transition: background 0.3s;
         }
         #login-btn:hover { background-color: #357ae8; }
-        #user-info { margin-top: 20px; color: #81c784; }
+
+        /* Sohbet Ekranı Stilleri (Başlangıçta Gizli) */
+        #chat-container {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+        }
+        header {
+            background: #1e1e1e;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        header h2 { margin: 0; color: #4CAF50; font-size: 20px; }
+        #user-profile { color: #81c784; font-size: 14px; }
+        
+        #chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            line-height: 1.4;
+        }
+        .message.ai {
+            background: #2a2a2a;
+            align-self: flex-start;
+            border-left: 4px solid #4CAF50;
+        }
+        .message.user {
+            background: #2b5278;
+            align-self: flex-end;
+        }
+        
+        #chat-input-area {
+            padding: 15px 20px;
+            background: #1e1e1e;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #333;
+        }
+        #chat-input {
+            flex: 1;
+            padding: 12px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 6px;
+            font-size: 15px;
+        }
+        #chat-input:focus { outline: none; border-color: #4CAF50; }
+        #send-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        #send-btn:hover { background-color: #45a049; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Gürai'ye Hoş Geldiniz</h1>
-        <p>Devam etmek için lütfen Google hesabınızla giriş yapın.</p>
+    <!-- GİRİŞ EKRANI -->
+    <div id="login-container">
+        <div class="card">
+            <h1>Gürai'ye Hoş Geldiniz</h1>
+            <p>Devam etmek için lütfen Google hesabınızla giriş yapın.</p>
+            <button id="login-btn" onclick="handleAuthClick()">Google ile Giriş Yap</button>
+        </div>
+    </div>
+
+    <!-- SOHBET EKRANI -->
+    <div id="chat-container">
+        <header>
+            <h2>Gürai Asistan</h2>
+            <div id="user-profile">Yükleniyor...</div>
+        </header>
         
-        <!-- Google Giriş Butonu -->
-        <button id="login-btn" onclick="handleAuthClick()">Google ile Giriş Yap</button>
+        <div id="chat-messages">
+            <div class="message ai">Merhaba! Ben Gürai, senin yapay zeka asistanınım. Sana bugün nasıl yardımcı olabilirim?</div>
+        </div>
         
-        <div id="user-info"></div>
+        <div id="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Bir şeyler yazın..." onkeypress="checkEnter(event)">
+            <button id="send-btn" onclick="sendMessage()">Gönder</button>
+        </div>
     </div>
 
     <script>
         let client;
 
         window.onload = function () {
-            // Google OAuth İstemcisini Başlatıyoruz
             client = google.accounts.oauth2.initTokenClient({
                 client_id: '508069214780-j2btpn15rhmn7nmhcfui74bcfn8l187l.apps.googleusercontent.com',
                 scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
                 callback: (response) => {
                     if (response.access_token) {
-                        console.log("Access Token Alındı:", response.access_token);
-                        document.getElementById('user-info').innerText = "Giriş başarılı! Veriler yükleniyor...";
-                        
-                        // Kullanıcı bilgilerini Google API üzerinden çekme
+                        // Kullanıcı bilgilerini al
                         fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                             headers: { 'Authorization': `Bearer ${response.access_token}` }
                         })
                         .then(res => res.json())
                         .then(data => {
-                            document.getElementById('user-info').innerText = `Hoş geldin, ${data.name} (${data.email})`;
+                            // Giriş ekranını gizle, sohbet ekranını aç
+                            document.getElementById('login-container').style.display = 'none';
+                            document.getElementById('chat-container').style.display = 'flex';
+                            document.getElementById('user-profile').innerText = `${data.name} (${data.email})`;
                         });
                     }
                 },
@@ -83,7 +174,39 @@
             if (client) {
                 client.requestAccessToken();
             } else {
-                alert("Google servisleri henüz yüklenmedi, lütfen birkaç saniye bekleyip tekrar deneyin.");
+                alert("Google servisleri henüz yüklenmedi, lütfen biraz bekleyin.");
+            }
+        }
+
+        function sendMessage() {
+            const inputField = document.getElementById('chat-input');
+            const messageText = inputField.value.trim();
+            if (!messageText) return;
+
+            const messagesDiv = document.getElementById('chat-messages');
+
+            // Kullanıcının mesajını ekle
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.innerText = messageText;
+            messagesDiv.appendChild(userMsg);
+
+            inputField.value = '';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // Yapay zekanın örnek yanıtı (Burayı kendi AI mantığınla geliştirebilirsin)
+            setTimeout(() => {
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message ai';
+                aiMsg.innerText = "Harika bir soru! Bunu Gürai altyapısıyla senin için işliyorum...";
+                messagesDiv.appendChild(aiMsg);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }, 1000);
+        }
+
+        function checkEnter(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
             }
         }
     </script>
