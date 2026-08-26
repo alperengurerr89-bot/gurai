@@ -3,21 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gürai - Yapay Zeka Asistanı</title>
+    <title>Gürai - Hesap Yönetimi ve Asistan</title>
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121212;
             color: #ffffff;
-            margin: 0;
             height: 100vh;
             display: flex;
             flex-direction: column;
         }
-        /* Giriş Ekranı Stilleri */
+        /* Giriş Ekranı */
         #login-container {
             display: flex;
             flex-direction: column;
@@ -31,9 +30,11 @@
             padding: 40px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            max-width: 400px;
+            width: 90%;
         }
-        h1 { color: #4CAF50; margin-bottom: 10px; }
-        p { color: #b0b0b0; margin-bottom: 30px; }
+        h1 { color: #4CAF50; margin-bottom: 10px; font-size: 24px; }
+        p { color: #b0b0b0; margin-bottom: 30px; font-size: 14px; }
         #login-btn {
             background-color: #4285F4;
             color: white;
@@ -43,27 +44,91 @@
             border-radius: 6px;
             cursor: pointer;
             transition: background 0.3s;
+            width: 100%;
         }
         #login-btn:hover { background-color: #357ae8; }
 
-        /* Sohbet Ekranı Stilleri (Başlangıçta Gizli) */
-        #chat-container {
+        /* Ana Panel / Hesap Yönetimi + Sohbet */
+        #app-container {
             display: none;
-            flex-direction: column;
             height: 100vh;
             width: 100%;
-        }
-        header {
-            background: #1e1e1e;
-            padding: 15px 20px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #333;
         }
-        header h2 { margin: 0; color: #4CAF50; font-size: 20px; }
-        #user-profile { color: #81c784; font-size: 14px; }
+        /* Sol Yan Menü (Hesap Yönetimi) */
+        sidebar {
+            width: 280px;
+            background: #181818;
+            border-right: 1px solid #2a2a2a;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            justify-content: space-between;
+        }
+        .account-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        #user-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+            border: 2px solid #4CAF50;
+            object-fit: cover;
+        }
+        #user-name { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        #user-email { font-size: 12px; color: #888; word-break: break-all; }
         
+        .menu-links {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .menu-btn {
+            background: #222;
+            color: #ddd;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .menu-btn:hover { background: #2a2a2a; color: #fff; }
+        
+        .logout-btn {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .logout-btn:hover { background-color: #b71c1c; }
+
+        /* Sağ Taraf (Sohbet Ekranı) */
+        .chat-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #121212;
+        }
+        .chat-header {
+            background: #181818;
+            padding: 20px;
+            border-bottom: 1px solid #2a2a2a;
+            font-size: 18px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
         #chat-messages {
             flex: 1;
             padding: 20px;
@@ -77,9 +142,10 @@
             padding: 12px 16px;
             border-radius: 8px;
             line-height: 1.4;
+            font-size: 14px;
         }
         .message.ai {
-            background: #2a2a2a;
+            background: #1e1e1e;
             align-self: flex-start;
             border-left: 4px solid #4CAF50;
         }
@@ -87,29 +153,28 @@
             background: #2b5278;
             align-self: flex-end;
         }
-        
-        #chat-input-area {
-            padding: 15px 20px;
-            background: #1e1e1e;
+        .chat-input-area {
+            padding: 20px;
+            background: #181818;
             display: flex;
             gap: 10px;
-            border-top: 1px solid #333;
+            border-top: 1px solid #2a2a2a;
         }
         #chat-input {
             flex: 1;
             padding: 12px;
-            background: #2a2a2a;
-            border: 1px solid #444;
+            background: #222;
+            border: 1px solid #333;
             color: white;
             border-radius: 6px;
-            font-size: 15px;
+            font-size: 14px;
         }
         #chat-input:focus { outline: none; border-color: #4CAF50; }
         #send-btn {
             background-color: #4CAF50;
             color: white;
             border: none;
-            padding: 0 20px;
+            padding: 0 24px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
@@ -128,20 +193,36 @@
         </div>
     </div>
 
-    <!-- SOHBET EKRANI -->
-    <div id="chat-container">
-        <header>
-            <h2>Gürai Asistan</h2>
-            <div id="user-profile">Yükleniyor...</div>
-        </header>
-        
-        <div id="chat-messages">
-            <div class="message ai">Merhaba! Ben Gürai, senin yapay zeka asistanınım. Sana bugün nasıl yardımcı olabilirim?</div>
-        </div>
-        
-        <div id="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Bir şeyler yazın..." onkeypress="checkEnter(event)">
-            <button id="send-btn" onclick="sendMessage()">Gönder</button>
+    <!-- HESAP YÖNETİMİ VE SOHBET PANELİ (Başlangıçta Gizli) -->
+    <div id="app-container" style="display: none;">
+        <!-- Sol Yan Menü (Hesap Bilgileri) -->
+        <sidebar>
+            <div>
+                <div class="account-section">
+                    <img id="user-avatar" src="" alt="Profil Resmi">
+                    <div id="user-name">Yükleniyor...</div>
+                    <div id="user-email">Yükleniyor...</div>
+                </div>
+                <div class="menu-links">
+                    <button class="menu-btn" onclick="alert('Hesap ayarları yakında eklenecek!')">⚙️ Hesap Ayarları</button>
+                    <button class="menu-btn" onclick="alert('Gürai v6.5 Aktif!')">🤖 Asistan Bilgisi</button>
+                </div>
+            </div>
+            <button class="logout-btn" onclick="location.reload()">Oturumu Kapat</button>
+        </sidebar>
+
+        <!-- Sağ Taraf (Sohbet Ekranı) -->
+        <div class="chat-main">
+            <div class="chat-header">Gürai Yapay Zeka Asistanı</div>
+            
+            <div id="chat-messages">
+                <div class="message ai">Merhaba! Hesabın başarıyla doğrulandı. Ben Gürai, sana nasıl yardımcı olabilirim?</div>
+            </div>
+            
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Mesajınızı yazın..." onkeypress="checkEnter(event)">
+                <button id="send-btn" onclick="sendMessage()">Gönder</button>
+            </div>
         </div>
     </div>
 
@@ -154,16 +235,21 @@
                 scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
                 callback: (response) => {
                     if (response.access_token) {
-                        // Kullanıcı bilgilerini al
                         fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                             headers: { 'Authorization': `Bearer ${response.access_token}` }
                         })
                         .then(res => res.json())
                         .then(data => {
-                            // Giriş ekranını gizle, sohbet ekranını aç
+                            // Giriş ekranını gizle, hesap yönetim panelini aç
                             document.getElementById('login-container').style.display = 'none';
-                            document.getElementById('chat-container').style.display = 'flex';
-                            document.getElementById('user-profile').innerText = `${data.name} (${data.email})`;
+                            document.getElementById('app-container').style.display = 'flex';
+                            
+                            // Kullanıcı verilerini yerleştir
+                            document.getElementById('user-name').innerText = data.name;
+                            document.getElementById('user-email').innerText = data.email;
+                            if (data.picture) {
+                                document.getElementById('user-avatar').src = data.picture;
+                            }
                         });
                     }
                 },
@@ -174,7 +260,7 @@
             if (client) {
                 client.requestAccessToken();
             } else {
-                alert("Google servisleri henüz yüklenmedi, lütfen biraz bekleyin.");
+                alert("Google servisleri yükleniyor, lütfen bekleyin.");
             }
         }
 
@@ -185,7 +271,7 @@
 
             const messagesDiv = document.getElementById('chat-messages');
 
-            // Kullanıcının mesajını ekle
+            // Kullanıcı mesajı
             const userMsg = document.createElement('div');
             userMsg.className = 'message user';
             userMsg.innerText = messageText;
@@ -194,11 +280,11 @@
             inputField.value = '';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-            // Yapay zekanın örnek yanıtı (Burayı kendi AI mantığınla geliştirebilirsin)
+            // Yapay zeka yanıt simülasyonu
             setTimeout(() => {
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'message ai';
-                aiMsg.innerText = "Harika bir soru! Bunu Gürai altyapısıyla senin için işliyorum...";
+                aiMsg.innerText = "Gürai sunucuları isteğinizi işledi: " + messageText;
                 messagesDiv.appendChild(aiMsg);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
             }, 1000);
