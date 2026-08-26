@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gürai - Yapay Zeka Asistanı</title>
+    <!-- Google Identity Services (Google Giriş Kütüphanesi) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        h1 { color: #4CAF50; margin-bottom: 10px; }
+        p { color: #b0b0b0; margin-bottom: 30px; }
+        #login-btn {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        #login-btn:hover { background-color: #357ae8; }
+        #user-info { margin-top: 20px; color: #81c784; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Gürai'ye Hoş Geldiniz</h1>
+        <p>Devam etmek için lütfen Google hesabınızla giriş yapın.</p>
+        
+        <!-- Google Giriş Butonu -->
+        <button id="login-btn" onclick="handleAuthClick()">Google ile Giriş Yap</button>
+        
+        <div id="user-info"></div>
+    </div>
+
+    <script>
+        let client;
+
+        window.onload = function () {
+            // Google OAuth İstemcisini Başlatıyoruz
+            client = google.accounts.oauth2.initTokenClient({
+                client_id: '508069214780-j2btpn15rhmn7nmhcfui74bcfn8l187l.apps.googleusercontent.com',
+                scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+                callback: (response) => {
+                    if (response.access_token) {
+                        console.log("Access Token Alındı:", response.access_token);
+                        document.getElementById('user-info').innerText = "Giriş başarılı! Veriler yükleniyor...";
+                        
+                        // Kullanıcı bilgilerini Google API üzerinden çekme
+                        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                            headers: { 'Authorization': `Bearer ${response.access_token}` }
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById('user-info').innerText = `Hoş geldin, ${data.name} (${data.email})`;
+                        });
+                    }
+                },
+            });
+        };
+
+        function handleAuthClick() {
+            if (client) {
+                client.requestAccessToken();
+            } else {
+                alert("Google servisleri henüz yüklenmedi, lütfen birkaç saniye bekleyip tekrar deneyin.");
+            }
+        }
+    </script>
+
+</body>
+</html>
