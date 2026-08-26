@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gürai - Hesap Yönetimi ve Asistan</title>
+    <title>Gürai - Yapay Zeka Asistanı</title>
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -48,87 +48,25 @@
         }
         #login-btn:hover { background-color: #357ae8; }
 
-        /* Ana Panel / Hesap Yönetimi + Sohbet */
+        /* Sohbet Ekranı */
         #app-container {
             display: none;
             height: 100vh;
             width: 100%;
-            display: flex;
-        }
-        /* Sol Yan Menü (Hesap Yönetimi) */
-        sidebar {
-            width: 280px;
-            background: #181818;
-            border-right: 1px solid #2a2a2a;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            justify-content: space-between;
-        }
-        .account-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #2a2a2a;
-        }
-        #user-avatar {
-            width: 70px;
-            height: 70px;
-            border-radius: 50%;
-            margin-bottom: 15px;
-            border: 2px solid #4CAF50;
-            object-fit: cover;
-        }
-        #user-name { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
-        #user-email { font-size: 12px; color: #888; word-break: break-all; }
-        
-        .menu-links {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .menu-btn {
-            background: #222;
-            color: #ddd;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            text-align: left;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        .menu-btn:hover { background: #2a2a2a; color: #fff; }
-        
-        .logout-btn {
-            background-color: #d32f2f;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .logout-btn:hover { background-color: #b71c1c; }
-
-        /* Sağ Taraf (Sohbet Ekranı) */
-        .chat-main {
-            flex: 1;
-            display: flex;
             flex-direction: column;
             background: #121212;
         }
-        .chat-header {
+        header {
             background: #181818;
-            padding: 20px;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid #2a2a2a;
-            font-size: 18px;
-            font-weight: bold;
-            color: #4CAF50;
         }
+        header h2 { margin: 0; color: #4CAF50; font-size: 18px; }
+        #user-profile { color: #81c784; font-size: 13px; }
+        
         #chat-messages {
             flex: 1;
             padding: 20px;
@@ -153,6 +91,7 @@
             background: #2b5278;
             align-self: flex-end;
         }
+        
         .chat-input-area {
             padding: 20px;
             background: #181818;
@@ -193,45 +132,30 @@
         </div>
     </div>
 
-    <!-- HESAP YÖNETİMİ VE SOHBET PANELİ (Başlangıçta Gizli) -->
-    <div id="app-container" style="display: none;">
-        <!-- Sol Yan Menü (Hesap Bilgileri) -->
-        <sidebar>
-            <div>
-                <div class="account-section">
-                    <img id="user-avatar" src="" alt="Profil Resmi">
-                    <div id="user-name">Yükleniyor...</div>
-                    <div id="user-email">Yükleniyor...</div>
-                </div>
-                <div class="menu-links">
-                    <button class="menu-btn" onclick="alert('Hesap ayarları yakında eklenecek!')">⚙️ Hesap Ayarları</button>
-                    <button class="menu-btn" onclick="alert('Gürai v6.5 Aktif!')">🤖 Asistan Bilgisi</button>
-                </div>
-            </div>
-            <button class="logout-btn" onclick="location.reload()">Oturumu Kapat</button>
-        </sidebar>
-
-        <!-- Sağ Taraf (Sohbet Ekranı) -->
-        <div class="chat-main">
-            <div class="chat-header">Gürai Yapay Zeka Asistanı</div>
-            
-            <div id="chat-messages">
-                <div class="message ai">Merhaba! Hesabın başarıyla doğrulandı. Ben Gürai, sana nasıl yardımcı olabilirim?</div>
-            </div>
-            
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Mesajınızı yazın..." onkeypress="checkEnter(event)">
-                <button id="send-btn" onclick="sendMessage()">Gönder</button>
-            </div>
+    <!-- SOHBET PANELİ -->
+    <div id="app-container">
+        <header>
+            <h2>Gürai Yapay Zeka Asistanı</h2>
+            <div id="user-profile">Yükleniyor...</div>
+        </header>
+        
+        <div id="chat-messages">
+            <div class="message ai">Merhaba! Ben Gürai, senin yapay zeka asistanınım. Sana bugün nasıl yardımcı olabilirim?</div>
+        </div>
+        
+        <div class="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Bir şeyler yazın..." onkeypress="checkEnter(event)">
+            <button id="send-btn" onclick="sendMessage()">Gönder</button>
         </div>
     </div>
 
     <script>
         let client;
+        let userName = "Kullanıcı";
 
         window.onload = function () {
             client = google.accounts.oauth2.initTokenClient({
-                client_id: '508069214780-j2btpn15rhmn7nmhcfui74bcfn8l187l.apps.googleusercontent.com',
+                client_id: '508069214780-j2btpn15rhmn7mhcfui74bcfn8l187l.apps.googleusercontent.com',
                 scope: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
                 callback: (response) => {
                     if (response.access_token) {
@@ -240,16 +164,10 @@
                         })
                         .then(res => res.json())
                         .then(data => {
-                            // Giriş ekranını gizle, hesap yönetim panelini aç
+                            userName = data.name;
                             document.getElementById('login-container').style.display = 'none';
                             document.getElementById('app-container').style.display = 'flex';
-                            
-                            // Kullanıcı verilerini yerleştir
-                            document.getElementById('user-name').innerText = data.name;
-                            document.getElementById('user-email').innerText = data.email;
-                            if (data.picture) {
-                                document.getElementById('user-avatar').src = data.picture;
-                            }
+                            document.getElementById('user-profile').innerText = `${data.name} (${data.email})`;
                         });
                     }
                 },
@@ -264,6 +182,23 @@
             }
         }
 
+        function getAIAssistantResponse(userText) {
+            const text = userText.toLowerCase();
+
+            // Akıllı Yanıt Mantığı
+            if (text.includes('merhaba') || text.includes('selam')) {
+                return `Selam ${userName}! Sana nasıl yardımcı olabilirim?`;
+            } else if (text.includes('nasıl') && (text.includes('iyisin') || text.includes('nasılın'))) {
+                return "Ben bir yapay zeka asistanıyım, her zaman harikayım ve kod yazmaya hazırım! Sen nasılsın?";
+            } else if (text.includes('sen kimsin') || text.includes('adın ne')) {
+                return "Ben Gürai, senin kişisel yapay zeka asistanınım.";
+            } else if (text.includes('kod') || text.includes('python') || text.includes('html')) {
+                return "Yazılım ve kodlama konularında sana yardımcı olmaktan mutluluk duyarım. Ne geliştirmek istiyorsun?";
+            } else {
+                return `Harika bir nokta! "${userText}" konusunu Gürai altyapısıyla işliyorum. Bunu senin için geliştirmeye devam edeceğim.`;
+            }
+        }
+
         function sendMessage() {
             const inputField = document.getElementById('chat-input');
             const messageText = inputField.value.trim();
@@ -271,7 +206,7 @@
 
             const messagesDiv = document.getElementById('chat-messages');
 
-            // Kullanıcı mesajı
+            // Kullanıcı mesajını ekle
             const userMsg = document.createElement('div');
             userMsg.className = 'message user';
             userMsg.innerText = messageText;
@@ -280,14 +215,14 @@
             inputField.value = '';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-            // Yapay zeka yanıt simülasyonu
+            // Yapay zeka yanıtını simüle et (Yapay zeka düşünüyor efekti için küçük gecikme)
             setTimeout(() => {
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'message ai';
-                aiMsg.innerText = "Gürai sunucuları isteğinizi işledi: " + messageText;
+                aiMsg.innerText = getAIAssistantResponse(messageText);
                 messagesDiv.appendChild(aiMsg);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            }, 1000);
+            }, 600);
         }
 
         function checkEnter(event) {
