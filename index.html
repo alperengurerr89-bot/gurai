@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gürai - Yapay Zeka Asistanı</title>
+    <title>Gürai - Kesintisiz Yapay Zeka Asistanı</title>
     <!-- Google Identity Services -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
@@ -76,11 +76,12 @@
             gap: 15px;
         }
         .message {
-            max-width: 70%;
+            max-width: 75%;
             padding: 12px 16px;
             border-radius: 8px;
-            line-height: 1.4;
+            line-height: 1.5;
             font-size: 14px;
+            word-wrap: break-word;
         }
         .message.ai {
             background: #1e1e1e;
@@ -140,7 +141,7 @@
         </header>
         
         <div id="chat-messages">
-            <div class="message ai">Merhaba! Ben Gürai, senin yapay zeka asistanınım. Sana bugün nasıl yardımcı olabilirim?</div>
+            <div class="message ai">Merhaba! Ben Gürai. Hiç kesintiye uğramadan seninle sohbet etmeye ve kod yazmaya hazırım. Bana ne sormak istersin?</div>
         </div>
         
         <div class="chat-input-area">
@@ -182,20 +183,21 @@
             }
         }
 
-        function getAIAssistantResponse(userText) {
-            const text = userText.toLowerCase();
+        function getBrainResponse(text) {
+            const t = text.toLowerCase();
 
-            // Akıllı Yanıt Mantığı
-            if (text.includes('merhaba') || text.includes('selam')) {
-                return `Selam ${userName}! Sana nasıl yardımcı olabilirim?`;
-            } else if (text.includes('nasıl') && (text.includes('iyisin') || text.includes('nasılın'))) {
-                return "Ben bir yapay zeka asistanıyım, her zaman harikayım ve kod yazmaya hazırım! Sen nasılsın?";
-            } else if (text.includes('sen kimsin') || text.includes('adın ne')) {
-                return "Ben Gürai, senin kişisel yapay zeka asistanınım.";
-            } else if (text.includes('kod') || text.includes('python') || text.includes('html')) {
-                return "Yazılım ve kodlama konularında sana yardımcı olmaktan mutluluk duyarım. Ne geliştirmek istiyorsun?";
+            if (t.includes('merhaba') || t.includes('selam') || t.includes('hey')) {
+                return `Selamlar ${userName}! Sistemler sorunsuz çalışıyor, bugün neler kodluyoruz?`;
+            } else if (t.includes('nasıl') && (t.includes('iyi') || t.includes('nasılın'))) {
+                return "Arka plandaki motorlar tam gaz çalışıyor, gayet iyiyim! Sen nasılsın, projeler nasıl gidiyor?";
+            } else if (t.includes('sen kimsin') || t.includes('ne yapabiliyorsun')) {
+                return "Ben Gürai'yim. Kesintisiz çalışan, kodlama, mantık yürütme ve proje geliştirme süreçlerinde sana destek olan yapay zeka asistanınım.";
+            } else if (t.includes('python') || t.includes('kod') || t.includes('html') || t.includes('js')) {
+                return "Harika bir programlama konusu! İlgili kod bloklarını ve mantığını kurmanda seve seve yardımcı olurum. Detayları paylaşabilirsin.";
+            } else if (t.includes('saat kaç') || t.includes('tarih')) {
+                return `Şu anki sistem zamanı: ${new Date().toLocaleTimeString()} - Her şey kontrol altında!`;
             } else {
-                return `Harika bir nokta! "${userText}" konusunu Gürai altyapısıyla işliyorum. Bunu senin için geliştirmeye devam edeceğim.`;
+                return `Anladım ${userName}: "${text}" konusunu işleme aldım. Kesintisiz bir şekilde bu özellik üzerinde birlikte çalışabiliriz. Başka ne ekleyelim?`;
             }
         }
 
@@ -215,14 +217,14 @@
             inputField.value = '';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-            // Yapay zeka yanıtını simüle et (Yapay zeka düşünüyor efekti için küçük gecikme)
+            // Yapay zeka yanıtı (hızlı ve kesintisiz akış)
             setTimeout(() => {
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'message ai';
-                aiMsg.innerText = getAIAssistantResponse(messageText);
+                aiMsg.innerText = getBrainResponse(messageText);
                 messagesDiv.appendChild(aiMsg);
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            }, 600);
+            }, 400);
         }
 
         function checkEnter(event) {
